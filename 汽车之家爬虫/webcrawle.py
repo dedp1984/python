@@ -93,6 +93,11 @@ def analysisHtml(htmlPath,file):
                 for carType in carTypes:
                     typeDtl=carType.find_all('div',recursive=False)
                     typeName=typeDtl[0].find('a').string
+                    pail = findCarPL(carPz)
+                    if pail == -1:
+                        pail = findCarPL(typeName)
+                        if pail == -1:
+                            pail = ''
                     typeGuidePrice=''
                     if isStopSale:
                         typeGuidePrice=typeDtl[1].text
@@ -100,14 +105,42 @@ def analysisHtml(htmlPath,file):
                         typeGuidePrice=typeDtl[2].text
                     #print(subCompany+"-"+carSeries+"-"+carPz+"-"+typeName+"-"+typeGuidePrice)
                     if isStopSale:
-                        file.write(subCompany+"-"+carSeries+"-"+carPz+"-"+typeName+"-"+typeGuidePrice+"-停售"+"\n")
+                        file.write(subCompany+","+carSeries+","+carPz+","+typeName+","+pail+","+typeGuidePrice+",停售"+"\n")
                     elif isSale:
-                        file.write(subCompany+"-"+carSeries+"-"+carPz+"-"+typeName+"-"+typeGuidePrice+"-在售"+"\n")
+                        file.write(subCompany+","+carSeries+","+carPz+","+typeName+","+pail+","+typeGuidePrice+",在售"+"\n")
                     elif isWillSale:
-                        file.write(subCompany+"-"+carSeries+"-"+carPz+"-"+typeName+"-"+typeGuidePrice+"-即将销售"+"\n")
+                        file.write(subCompany+","+carSeries+","+carPz+","+typeName+","+pail+","+typeGuidePrice+",即将销售"+"\n")
                     else:
                         pass
-                    
+#查找汽车排量
+def findCarPL(str):
+    print(str)
+    endIdx = str.find('L')
+    print(str[endIdx-1:endIdx])
+    print(str[endIdx-2:endIdx-1].isdigit())
+    if endIdx != -1:
+        if str[endIdx-1:endIdx].isdigit():
+            pass
+        else:
+            endIdx = -1
+    if endIdx == -1 :
+        endIdx = str.find('T')
+        if endIdx == -1:
+            endIdx = str.find('升')
+            if endIdx == -1:
+                return -1
+            else:
+                 return str[0:endIdx]
+        else:
+            tmp = str[0:endIdx]
+            startIdx = tmp.rfind(' ')
+            return tmp[startIdx+1:endIdx]
+    else:
+        tmp = str[0:endIdx]
+        startIdx = tmp.rfind(' ')
+        return tmp[startIdx+1:endIdx]
+def testFindStr():
+    print(findCarPL("2014款 1.4TSI GreenLine"))
 def test():
     print('开始分析网页......\n')
     listDir=os.listdir("d:\\qczj")
@@ -129,6 +162,7 @@ def main():
     fp.flush()
     fp.close()
     print('分析网页完成.....\n')
-main()
-#test()
-#getCarMainUrl()    
+#main()
+test()
+#getCarMainUrl()
+#testFindStr()    
